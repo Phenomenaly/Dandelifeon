@@ -3,5 +3,5 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="Dandelifeon.vcxproj" />
+  <Project Path="Dandelifeon.vcxproj" Id="b10359e5-e527-43cf-877c-69475ac678f5" />
 </Solution>
