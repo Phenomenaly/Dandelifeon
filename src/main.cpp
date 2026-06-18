@@ -119,7 +119,6 @@ int lua_Bitboard_getCell(lua_State* L) {
     return 1;
 }
 
-
 int lua_Handler_spawnTSpark(lua_State* L) {
     Bitboard_25* b = (Bitboard_25*)luaL_checkudata(L, 1, "Bitboard_25_Meta");
     int x = (int)luaL_checkinteger(L, 2);
@@ -151,7 +150,6 @@ int lua_Handler_mutateWalls(lua_State* L) {
     BitboardHandler::mutateWallsOnFootprint(*obs, *footprint, count);
     return 0;
 }
-
 
 struct LuaThreadContext {
     int threadId;

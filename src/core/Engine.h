@@ -1,7 +1,9 @@
 #pragma once
 #define NOMINMAX
 #include <immintrin.h>
+
 #include "Bitboard.h"
+
 
 class DandelifeonEngine_25 {
 private:

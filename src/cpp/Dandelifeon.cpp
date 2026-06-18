@@ -28,13 +28,13 @@ private:
     const uint32_t center_col_mask = 0x3800;
 
     inline bool checkAbsorption(const Bitboard_25& board) const {
-        return (board.data[11] | board.data[12] | board.data[13]) & center_col_mask;
+        return (board.data[12] | board.data[13] | board.data[14]) & center_col_mask;
     }
 
     inline int countAbsorbedCells(const Bitboard_25& board) const {
-        return __popcnt(board.data[11] & center_col_mask) +
-            __popcnt(board.data[12] & center_col_mask) +
-            __popcnt(board.data[13] & center_col_mask);
+        return  __popcnt(board.data[12] & center_col_mask) +
+                __popcnt(board.data[13] & center_col_mask) +
+                __popcnt(board.data[14] & center_col_mask);
     }
 
 public:
@@ -46,8 +46,11 @@ public:
         SimulationResult_25 result;
         result.footstep.clear();
 
+        Bitboard_25 localObstacles = obstacles;
+        localObstacles.setCell(12, 13, true);
+
         Bitboard_25 currentState = startBoard;
-        currentState.applyObstacles(obstacles);
+        currentState.applyObstacles(localObstacles);
 
         Bitboard_25 nextState;
         nextState.clear();
@@ -56,7 +59,7 @@ public:
         Bitboard_25* nxt = &nextState;
 
         for (int t = 1; t <= maxTicks; ++t) {
-            engine.step(*curr, *nxt, obstacles);
+            engine.step(*curr, *nxt, localObstacles);
 
             if (checkAbsorption(*nxt)) [[unlikely]] {
                 result.success = true;
