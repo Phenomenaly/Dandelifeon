@@ -18,11 +18,22 @@
     <ClCompile Include="src\main.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="src\core\Engine.h">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
     <ClCompile Include="src\cpp\Dandelifeon.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="scripts\main.lua" />
+    <ClInclude Include="src\core\Bitboard.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\BitboardHandler.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="src\cUI\ConsoleUI.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

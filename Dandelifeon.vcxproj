@@ -20,10 +20,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\cpp\Dandelifeon.cpp" />
+    <ClCompile Include="src\core\Engine.h" />
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="scripts\main.lua" />
+    <ClInclude Include="src\core\Bitboard.h" />
+    <ClInclude Include="src\core\BitboardHandler.h" />
+    <ClInclude Include="src\cUI\ConsoleUI.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>
