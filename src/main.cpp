@@ -34,7 +34,7 @@ void workerThreadTask(LuaThreadContext context) {
 }
 
 int main() {
-    int totalCores = std::thread::hardware_concurrency() + 6;
+    int totalCores = std::thread::hardware_concurrency();
     int workerCount = totalCores > 1 ? totalCores - 1 : 1;
 
     SimulatorConfig config;
