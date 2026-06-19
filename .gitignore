@@ -3,6 +3,8 @@ out/
 x64/
 Debug/
 Release/
+Dandelifeon/
+*.txt
 *.user
 *.suo
 *.db

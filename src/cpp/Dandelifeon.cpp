@@ -1,13 +1,14 @@
 #pragma once
 #define NOMINMAX
 #include <algorithm>
+
 #include "../core/Bitboard.h"
 #include "../core/Engine.h"
 
 
 struct SimulatorConfig {
-    int maxTicks = 60;
-    int manaPerCell = 100;
+    int maxTicks = 100;
+    int manaPerCell = 60;
 };
 
 struct SimulationResult_25 {
@@ -59,6 +60,8 @@ public:
         Bitboard_25* nxt = &nextState;
 
         for (int t = 1; t <= maxTicks; ++t) {
+            nxt->clear();
+    
             engine.step(*curr, *nxt, localObstacles);
 
             if (checkAbsorption(*nxt)) [[unlikely]] {

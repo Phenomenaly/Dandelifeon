@@ -10,6 +10,9 @@
 
 #include "../src/core/Bitboard.h"
 #include "../src/core/Engine.h"
+#include "../../Lua/include/lua.h"
+#include "../../Lua/include/lauxlib.h"
+#include "../../Lua/include/lualib.h"
 #include "../src/cpp/Dandelifeon.cpp"
 #include "../src/core/BitboardHandler.h"
 #include "../src/cUI/ConsoleUI.h"
@@ -310,8 +313,8 @@ int main() {
     int workerCount = totalCores > 1 ? totalCores - 1 : 1;
 
     SimulatorConfig config;
-    config.maxTicks = 60;
-    config.manaPerCell = 100;
+    config.maxTicks = 100;
+    config.manaPerCell = 60;
 
     DandelifeonSimulator_25 simulator(config);
     ThreadSafeArchive archive(workerCount);

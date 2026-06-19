@@ -2,6 +2,7 @@
 #define NOMINMAX
 #include <vector>
 #include <random>
+
 #include "Bitboard.h"
 
 

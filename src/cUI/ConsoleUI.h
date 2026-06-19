@@ -22,6 +22,7 @@ struct SharedLeaderboard {
     Bitboard_25 bestCells;
     Bitboard_25 bestWalls;
     int bestMana = 0;
+    int bestTicks = 0;
 };
 
 class ConsoleUI {
@@ -33,6 +34,9 @@ private:
     const std::string COLOR_RESET = "\033[0m";
     const std::string COLOR_GREEN = "\033[32m";
     const std::string COLOR_YELLOW = "\033[33m";
+    const std::string COLOR_CYAN = "\033[36m";
+
+    const std::string ERASE_LINE_END = "\033[K";
 
     void savePatternToFile(const Bitboard_25& cells, const Bitboard_25& walls) {
         std::ofstream out("pattern.txt");
@@ -40,10 +44,10 @@ private:
 
         for (int y = 1; y <= 25; ++y) {
             for (int x = 0; x < 25; ++x) {
-                if (y == 13 && x == 12)         { out << "F "; }
-                else if (walls.getCell(x, y))   { out << "W "; }
-                else if (cells.getCell(x, y))   { out << "C "; }
-                else                            { out << ". "; }
+                if (y == 13 && x == 12) { out << "F "; }
+                else if (walls.getCell(x, y)) { out << "W "; }
+                else if (cells.getCell(x, y)) { out << "C "; }
+                else { out << ". "; }
             }
             out << "\n";
         }
@@ -82,21 +86,25 @@ public:
         lastTotalIterations = totalIterations;
 
         std::stringstream ss;
-        ss << "\033[H"; 
+        ss << "\033[H";
 
-        ss << "=================================\n";
-        ss << " Stream  |  Ticks  |  Mana\n";
-        ss << "---------------------------------\n";
+        ss << "Stream  |  Ticks   |  Mana" << ERASE_LINE_END << "\n";
+        ss << "---------------------------------" << ERASE_LINE_END << "\n";
         for (const auto& t : leaderboard.threads) {
-            ss << " S" << t.threadId << "      |  "
-                << (t.ticks < 10 ? "0" : "") << t.ticks << "     |  "
-                << t.mana << "\n";
+            ss << "S" << t.threadId << "      |  "
+                << t.ticks << (t.ticks < 10 ? "        |  " : (t.ticks < 100 ? "       |  " : "      |  "))
+                << t.mana << ERASE_LINE_END << "\n";
         }
-        ss << "=================================\n";
+        ss << "---------------------------------" << ERASE_LINE_END << "\n";
 
-        ss << " Total Operations: " << COLOR_GREEN << totalIterations << COLOR_RESET << "\n";
-        ss << " Operations/Sec:   " << COLOR_YELLOW << static_cast<uint64_t>(iterationsPerSecond) << COLOR_RESET << "\n";
-        ss << "=================================\n";
+        ss << COLOR_CYAN << "BEST    |  "
+            << leaderboard.bestTicks << (leaderboard.bestTicks < 10 ? "        |  " : (leaderboard.bestTicks < 100 ? "       |  " : "      |  "))
+            << leaderboard.bestMana << COLOR_RESET << ERASE_LINE_END << "\n";
+
+        ss << "---------------------------------" << ERASE_LINE_END << "\n";
+
+        ss << "Total Operations: " << COLOR_GREEN << totalIterations << COLOR_RESET << ERASE_LINE_END << "\n";
+        ss << "Operations/Sec:   " << COLOR_YELLOW << static_cast<uint64_t>(iterationsPerSecond) << COLOR_RESET << ERASE_LINE_END << "\n";
 
         std::cout << ss.str() << std::flush;
     }
