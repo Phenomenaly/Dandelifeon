@@ -38,13 +38,16 @@ end
 function Genome:reset(local_rng)
     self.cells:clear()
     self.walls:clear()
-    local offsetX = local_rng:random(5, 15)
-    local offsetY = local_rng:random(5, 15)
-    BitboardHandler.spawnTSpark(self.cells, offsetX, offsetY)
+    
+    local offsetY = local_rng:random(2, 10)
+    
+    local pointingUp = local_rng:random(0, 1) == 1
+    
+    BitboardHandler.spawnTSparkSymmetric(self.cells, offsetY, pointingUp)
 end
 
 function Genome:mutate(footstep, mutation_count)
-    BitboardHandler.mutateWallsOnFootprint(self.walls, footstep, mutation_count)
+    BitboardHandler.mutateWallsSymmetric(self.walls, footstep, mutation_count)
 end
 
 return Genome

@@ -24,9 +24,11 @@
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\core\Archive.h" />
     <ClInclude Include="src\core\Bitboard.h" />
     <ClInclude Include="src\core\BitboardHandler.h" />
     <ClInclude Include="src\cUI\ConsoleUI.h" />
+    <ClInclude Include="src\LuaAPI.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>

@@ -7,6 +7,8 @@ local MUTATION_WALL_TOGGLE = 1
 local MUTATION_SHIFT       = 2
 local MUTATION_ROTATE      = 3
 
+local MANA_PER_CELL = 60
+
 function Solver.new(local_rng)
     local self = setmetatable({}, Solver)
     self.rng = local_rng
@@ -16,9 +18,9 @@ function Solver.new(local_rng)
     self.lastFootprint = nil
     
     self.mutationWeights = {
-        [MUTATION_WALL_TOGGLE] = 0.70,
-        [MUTATION_SHIFT]       = 0.20,
-        [MUTATION_ROTATE]      = 0.10
+        [MUTATION_WALL_TOGGLE] = 0.50,
+        [MUTATION_SHIFT]       = 0.50,
+        [MUTATION_ROTATE] = 0.05
     }
     self.lastAppliedMutation = nil
     return self
@@ -38,8 +40,8 @@ end
 
 function Solver:rewardLastMutation(success)
     if not self.lastAppliedMutation then return end
-    local reward = 0.05
-    local penalty = 0.01
+    local reward = 0.005
+    local penalty = 0.001
     
     if success then
         self.mutationWeights[self.lastAppliedMutation] = self.mutationWeights[self.lastAppliedMutation] + reward
@@ -55,8 +57,8 @@ end
 function Solver:step()
     local nextGenome = Genome.clone(self.currentGenome)
     local mutationCount = 1
-    if self.stagnation > 50000 then mutationCount = 3 end
-    if self.stagnation > 500000 then mutationCount = 10 end
+    if self.stagnation > 500000 then mutationCount = 3 end
+    if self.stagnation > 5000000 then mutationCount = 10 end
     
     local mType = self:chooseMutationType()
     self.lastAppliedMutation = mType
@@ -75,8 +77,7 @@ function Solver:step()
     
     local fitness = 0.0
     if res.success then
-        local blocks = nextGenome.cells:popcount()
-        fitness = res.mana / (blocks > 0 and blocks or 1)
+        fitness = res.mana
     end
     
     if fitness > self.bestFitness then
