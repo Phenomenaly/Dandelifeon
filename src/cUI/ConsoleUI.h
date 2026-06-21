@@ -1,4 +1,5 @@
 #pragma once
+
 #define NOMINMAX
 #include <iostream>
 #include <string>
@@ -9,24 +10,10 @@
 #include <iomanip>
 #include <algorithm>
 
-#include "../core/Bitboard.h"
+#include "../core/Types.h"
+#include "../core/BitboardHandler.h"
 
-
-struct ThreadStatus {
-    int threadId = 0;
-    int ticks = 0;
-    int mana = 0;
-    uint64_t iterations = 0;
-};
-
-struct SharedLeaderboard {
-    std::vector<ThreadStatus> threads;
-    Bitboard_25 bestCells;
-    Bitboard_25 bestWalls;
-    int bestMana = 0;
-    int bestTicks = 0;
-};
-
+template <typename BitboardType>
 class ConsoleUI {
 private:
     uint64_t lastTotalIterations = 0;
@@ -39,31 +26,24 @@ private:
     const std::string COLOR_CYAN = "\033[36m";
     const std::string ERASE_LINE_END = "\033[K";
 
-    std::string formatNumber(uint64_t num) const {
-        std::string s = std::to_string(num);
-        std::string result;
-        int count = 0;
-        for (int i = static_cast<int>(s.length()) - 1; i >= 0; --i) {
-            result.push_back(s[i]);
-            count++;
-            if (count % 3 == 0 && i != 0) {
-                result.push_back(' ');
-            }
-        }
-        std::reverse(result.begin(), result.end());
-        return result;
-    }
-
-    void savePatternToFile(const Bitboard_25& cells, const Bitboard_25& walls) {
+    void savePatternToFile(const BitboardType& cells, const BitboardType& walls) {
         std::ofstream out("pattern.txt");
         if (!out.is_open()) return;
 
-        for (int y = 1; y <= 25; ++y) {
-            for (int x = 0; x < 25; ++x) {
-                if (y == 13 && x == 12) { out << "F "; }
-                else if (walls.getCell(x, y)) { out << "W "; }
-                else if (cells.getCell(x, y)) { out << "C "; }
-                else { out << ". "; }
+        for (int y = 1; y <= BitboardType::HEIGHT; ++y) {
+            for (int x = 0; x < BitboardType::WIDTH; ++x) {
+                if (y == BitboardType::CENTER_Y && x == BitboardType::CENTER_X) {
+                    out << "F ";
+                }
+                else if (walls.getCell(x, y)) {
+                    out << "W ";
+                }
+                else if (cells.getCell(x, y)) {
+                    out << "C ";
+                }
+                else {
+                    out << ". ";
+                }
             }
             out << "\n";
         }
@@ -80,7 +60,7 @@ public:
         std::cout << "\033[?25h" << std::flush;
     }
 
-    void render(const SharedLeaderboard& leaderboard) {
+    void render(const SharedLeaderboard<BitboardType>& leaderboard, const std::vector<LeaderboardEntry<BitboardType>>& topTen) {
         auto currentTime = std::chrono::steady_clock::now();
         std::chrono::duration<double> elapsed = currentTime - lastTime;
         lastTime = currentTime;
@@ -104,33 +84,34 @@ public:
         std::stringstream ss;
         ss << "\033[H";
 
-        ss << "---------------------------------\n" << ERASE_LINE_END;
-        ss << " STREAM  |  TICKS   |  MANA" << ERASE_LINE_END << "\n";
+        ss << "---------------------------------" << ERASE_LINE_END << "\n";
+        ss << " Stream  |  Ticks   |  Mana" << ERASE_LINE_END << "\n";
         ss << "---------------------------------" << ERASE_LINE_END << "\n";
         for (const auto& t : leaderboard.threads) {
             ss << " S" << t.threadId << "      |  "
                 << t.ticks << (t.ticks < 10 ? "        |  " : (t.ticks < 100 ? "       |  " : "      |  "))
-                << formatNumber(t.mana) << ERASE_LINE_END << "\n";
+                << t.mana << ERASE_LINE_END << "\n";
         }
         ss << "---------------------------------\n" << ERASE_LINE_END;
-        ss << "         ABSOLUTE RECORD         " << ERASE_LINE_END << "\n";
+
+        ss << "          TOP-10 ARCHIVE         " << ERASE_LINE_END << "\n";
+        ss << "---------------------------------" << ERASE_LINE_END << "\n";
+        ss << " Rank  |  Ticks  |  Mana  |  Dist" << ERASE_LINE_END << "\n";
         ss << "---------------------------------" << ERASE_LINE_END << "\n";
 
-        if (leaderboard.bestMana > 0) {
-            int absorbedCells = leaderboard.bestMana / (leaderboard.bestTicks * 60);
-            std::string successTag = (leaderboard.bestMana >= 36000) ? (" " + COLOR_GREEN + "[SUCCESS]" + COLOR_RESET) : "";
-
-            ss << " Ticks:  " << leaderboard.bestTicks << ERASE_LINE_END << "\n";
-            ss << " Cells:  " << absorbedCells << ERASE_LINE_END << "\n";
-            ss << " Mana:   " << formatNumber(leaderboard.bestMana) << COLOR_RESET << successTag << ERASE_LINE_END << "\n";
+        size_t displayCount = std::min(static_cast<size_t>(10), topTen.size());
+        for (size_t i = 0; i < displayCount; ++i) {
+            const auto& entry = topTen[i];
+            ss << COLOR_CYAN << " #" << (i + 1) << (i + 1 < 10 ? "    |  " : "   |  ")
+                << entry.ticks << (entry.ticks < 10 ? "       |  " : (entry.ticks < 100 ? "      |  " : "     |  "))
+                << entry.mana << (entry.mana < 1000 ? "    |  " : (entry.mana < 10000 ? "   |  " : "  |  "))
+                << std::fixed << std::setprecision(1) << BitboardHandler::getFigureDistance(entry.cells) << COLOR_RESET << ERASE_LINE_END << "\n";
         }
-        else {
-            ss << " No records found yet" << ERASE_LINE_END << "\n";
-        }
-        ss << "---------------------------------\n" << ERASE_LINE_END;
+        ss << "---------------------------------" << ERASE_LINE_END << "\n";
 
-        ss << " Total operations:  " << COLOR_GREEN << formatNumber(totalIterations) << COLOR_RESET << ERASE_LINE_END << "\n";
-        ss << " Current speed:     " << COLOR_YELLOW << formatNumber(static_cast<uint64_t>(iterationsPerSecond)) << COLOR_RESET << " O/s" << ERASE_LINE_END << "\n";
+        ss << " Total Operations: " << COLOR_GREEN << totalIterations << COLOR_RESET << ERASE_LINE_END << "\n";
+        ss << " Operations/Sec:   " << COLOR_YELLOW << static_cast<uint64_t>(iterationsPerSecond) << " O/s" << COLOR_RESET << "\n";
+        ss << "---------------------------------" << ERASE_LINE_END << "\n";
 
         std::cout << ss.str() << std::flush;
     }

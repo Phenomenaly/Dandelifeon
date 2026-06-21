@@ -1,31 +1,20 @@
 #pragma once
+
 #define NOMINMAX
 #include <algorithm>
 
-#include "../core/Bitboard.h"
-#include "../core/Engine.h"
+#include "../core/ISimulation.h"
+#include "../core/BitboardHandler.h"
+#include "Engine_25.h"
 
 
-struct SimulatorConfig {
-    int maxTicks = 100;
-    int manaPerCell = 60;
-};
-
-struct SimulationResult_25 {
-    int ticks = 0;
-    int mana = 0;
-    bool success = false;
-    Bitboard_25 footstep;
-};
-
-class DandelifeonSimulator_25 {
+class DandelifeonSimulator_25 : public IDandelifeonSimulator<Bitboard_25> {
 private:
     DandelifeonEngine_25 engine;
 
     const int maxTicks;
     const int manaPerCell;
 
-    // (1 << 11) | (1 << 12) | (1 << 13)
     const uint32_t center_col_mask = 0x3800;
 
     inline bool checkAbsorption(const Bitboard_25& board) const {
@@ -43,8 +32,8 @@ public:
         : maxTicks(config.maxTicks), manaPerCell(config.manaPerCell) {
     }
 
-    SimulationResult_25 run(const Bitboard_25& startBoard, const Bitboard_25& obstacles) const {
-        SimulationResult_25 result;
+    SimulationResult<Bitboard_25> run(const Bitboard_25& startBoard, const Bitboard_25& obstacles) const override {
+        SimulationResult<Bitboard_25> result;
         result.footstep.clear();
 
         Bitboard_25 localObstacles = obstacles;
@@ -61,7 +50,7 @@ public:
 
         for (int t = 1; t <= maxTicks; ++t) {
             nxt->clear();
-    
+
             engine.step(*curr, *nxt, localObstacles);
 
             if (checkAbsorption(*nxt)) [[unlikely]] {

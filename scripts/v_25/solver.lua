@@ -7,8 +7,6 @@ local MUTATION_WALL_TOGGLE = 1
 local MUTATION_SHIFT       = 2
 local MUTATION_ROTATE      = 3
 
-local MANA_PER_CELL = 60
-
 function Solver.new(local_rng)
     local self = setmetatable({}, Solver)
     self.rng = local_rng
@@ -20,7 +18,7 @@ function Solver.new(local_rng)
     self.mutationWeights = {
         [MUTATION_WALL_TOGGLE] = 0.50,
         [MUTATION_SHIFT]       = 0.50,
-        [MUTATION_ROTATE] = 0.05
+        [MUTATION_ROTATE]      = 0.05
     }
     self.lastAppliedMutation = nil
     return self

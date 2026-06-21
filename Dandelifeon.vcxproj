@@ -19,16 +19,25 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\cpp\Dandelifeon.cpp" />
-    <ClCompile Include="src\core\Engine.h" />
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\core\Archive.h" />
-    <ClInclude Include="src\core\Bitboard.h" />
     <ClInclude Include="src\core\BitboardHandler.h" />
+    <ClInclude Include="src\core\IBitboard.h" />
+    <ClInclude Include="src\core\ISimulation.h" />
+    <ClInclude Include="src\core\Types.h" />
     <ClInclude Include="src\cUI\ConsoleUI.h" />
     <ClInclude Include="src\LuaAPI.h" />
+    <ClInclude Include="src\v_25\Bitboard_25.h" />
+    <ClInclude Include="src\v_25\Dandelifeon_25.h" />
+    <ClInclude Include="src\v_25\Engine_25.h" />
+    <ClInclude Include="src\v_75\Bitboard_75.h" />
+    <ClInclude Include="src\v_75\Dandelifeon_75.h" />
+    <ClInclude Include="src\v_75\Engine_75.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="README.md" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>

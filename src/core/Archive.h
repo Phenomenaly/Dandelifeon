@@ -1,32 +1,25 @@
 #pragma once
-#define NOMINMAX
+
 #include <mutex>
 #include <vector>
 #include <atomic>
 #include <algorithm>
+#include <cmath>
 
-#include "Bitboard.h"
+#include "Types.h"
 #include "BitboardHandler.h"
-#include "../cUI/ConsoleUI.h"
-
 
 struct alignas(64) AlignedCounter {
     std::atomic<uint64_t> value{ 0 };
 };
 
-struct LeaderboardEntry {
-    Bitboard_25 cells;
-    Bitboard_25 walls;
-    int ticks = 0;
-    int mana = 0;
-};
-
+template <typename BitboardType>
 class ThreadSafeArchive {
 private:
     std::mutex mtx;
-    SharedLeaderboard leaderboard;
+    SharedLeaderboard<BitboardType> leaderboard;
     std::vector<AlignedCounter> threadIterations;
-    std::vector<LeaderboardEntry> topTen;
+    std::vector<LeaderboardEntry<BitboardType>> topTen;
 
 public:
     ThreadSafeArchive(int threadCount) : threadIterations(threadCount) {
@@ -40,26 +33,29 @@ public:
         threadIterations[threadId].value.fetch_add(1, std::memory_order_relaxed);
     }
 
-    void submit(int threadId, const Bitboard_25& cells, const Bitboard_25& walls, int ticks, int mana) {
+    void submit(int threadId, const BitboardType& cells, const BitboardType& walls, int ticks, int mana) {
         std::lock_guard<std::mutex> lock(mtx);
 
         leaderboard.threads[threadId].ticks = ticks;
         leaderboard.threads[threadId].mana = mana;
 
+        double dist = BitboardHandler::getFigureDistance(cells);
         for (const auto& e : topTen) {
-            if (e.mana == mana && e.ticks == ticks) return;
+            if (e.mana == mana && std::abs(BitboardHandler::getFigureDistance(e.cells) - dist) < 0.001) {
+                return;
+            }
         }
 
-        LeaderboardEntry entry;
+        LeaderboardEntry<BitboardType> entry;
         entry.cells = cells;
         entry.walls = walls;
         entry.ticks = ticks;
         entry.mana = mana;
 
         topTen.push_back(entry);
-
-        std::sort(topTen.begin(), topTen.end(), [](const LeaderboardEntry& a, const LeaderboardEntry& b) {
-            return a.mana > b.mana;
+        std::sort(topTen.begin(), topTen.end(), [](const LeaderboardEntry<BitboardType>& a, const LeaderboardEntry<BitboardType>& b) {
+            if (a.mana != b.mana) return a.mana > b.mana;
+            return BitboardHandler::getFigureDistance(a.cells) > BitboardHandler::getFigureDistance(b.cells);
             });
 
         if (topTen.size() > 10) {
@@ -74,7 +70,7 @@ public:
         }
     }
 
-    bool getElite(Bitboard_25& destCells, Bitboard_25& destWalls, int randomIndex) {
+    bool getElite(BitboardType& destCells, BitboardType& destWalls, int randomIndex) {
         std::lock_guard<std::mutex> lock(mtx);
         if (topTen.empty()) return false;
 
@@ -84,12 +80,12 @@ public:
         return true;
     }
 
-    std::vector<LeaderboardEntry> getTopTen() {
+    std::vector<LeaderboardEntry<BitboardType>> getTopTen() {
         std::lock_guard<std::mutex> lock(mtx);
         return topTen;
     }
 
-    SharedLeaderboard getSnapshot() {
+    SharedLeaderboard<BitboardType> getSnapshot() {
         std::lock_guard<std::mutex> lock(mtx);
         for (size_t i = 0; i < threadIterations.size(); ++i) {
             leaderboard.threads[i].iterations = threadIterations[i].value.load(std::memory_order_relaxed);

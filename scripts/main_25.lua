@@ -1,4 +1,4 @@
-package.path = package.path .. ";scripts/?.lua;./scripts/?.lua"
+package.path = package.path .. ";scripts/v_25/?.lua;./scripts/v_25/?.lua"
 
 local Genome = require("Genome")
 local Solver = require("Solver")

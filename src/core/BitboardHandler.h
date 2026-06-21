@@ -1,11 +1,13 @@
 #pragma once
+
 #define NOMINMAX
 #include <vector>
 #include <random>
 #include <cmath>
 #include <algorithm>
 
-#include "Bitboard.h"
+// #include "IBitboard.h"
+#include "../v_25/Bitboard_25.h"
 
 
 class BitboardHandler {
@@ -20,14 +22,14 @@ private:
     }
 
 public:
-    static void spawnTSpark(Bitboard_25& board, int x, int y) {
+    static void spawnTshape(Bitboard_25& board, int x, int y) {
         board.setCell(x, y, true);
         board.setCell(x + 1, y, true);
         board.setCell(x + 2, y, true);
         board.setCell(x + 1, y + 2, true);
     }
 
-    static void spawnTSparkSymmetric(Bitboard_25& board, int y, bool pointingUp) {
+    static void spawnTshapeSymmetric(Bitboard_25& board, int y, bool pointingUp) {
         int x = 11;
         if (pointingUp) {
             board.setCell(x, y, true);
@@ -145,7 +147,7 @@ public:
                 }
             }
         }
-        if (activeCoords.empty()) 
+        if (activeCoords.empty())
             return;
 
         std::vector<double> cumulativeWeights(activeCoords.size());
