@@ -1,0 +1,31 @@
+﻿# Build directories
+build/
+out/
+cmake-build-*/
+
+# Generated files
+CMakeFiles/
+CMakeScripts/
+CMakeCache.txt
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+DartConfiguration.tcl
+Makefile
+
+# IDE / editor files
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.swp
+*.swo
+
+# Tests / coverage
+Testing/
+coverage/
+
+# Local CMake presets
+CMakeUserPresets.json
