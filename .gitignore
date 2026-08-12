@@ -18,6 +18,7 @@ Makefile
 .vs/
 .vscode/
 .idea/
+/lua/
 *.user
 *.suo
 *.swp
