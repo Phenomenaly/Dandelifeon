@@ -9,6 +9,7 @@
 #include "Dandelifeon.h"
 #include "Archive.h"
 
+
 struct LuaThreadContext {
     int threadId;
     ThreadSafeArchive* archive;
@@ -180,6 +181,32 @@ inline int lua_Archive_getElite(lua_State* L) {
     return 1;
 }
 
+inline int lua_Archive_getWorstElite(lua_State* L) {
+    LuaThreadContext* ctx = (LuaThreadContext*)lua_touserdata(L, lua_upvalueindex(1));
+
+    Bitboard tempCells;
+    Bitboard tempWalls;
+
+    if (ctx->archive->getWorstElite(tempCells, tempWalls)) {
+        lua_pushboolean(L, true);
+
+        void* s1 = lua_newuserdata(L, sizeof(Bitboard));
+        new (s1) Bitboard(tempCells);
+        luaL_getmetatable(L, Bitboard::META_NAME);
+        lua_setmetatable(L, -2);
+
+        void* s2 = lua_newuserdata(L, sizeof(Bitboard));
+        new (s2) Bitboard(tempWalls);
+        luaL_getmetatable(L, Bitboard::META_NAME);
+        lua_setmetatable(L, -2);
+
+        return 3;
+    }
+
+    lua_pushboolean(L, false);
+    return 1;
+}
+
 inline int lua_RNG_random(lua_State* L) {
     static thread_local std::random_device rd;
     static thread_local std::mt19937 gen(rd());
@@ -219,7 +246,7 @@ inline void registerCppInLua(lua_State* L, LuaThreadContext* context) {
     lua_setfield(L, -2, "getCell");
     lua_pop(L, 1);
 
-    lua_register(L, "Bitboard_new", lua_Bitboard_new); // Updated from Bitboard_new
+    lua_register(L, "Bitboard_new", lua_Bitboard_new);
 
     lua_newtable(L);
     lua_pushcfunction(L, lua_Handler_spawnTshape);
@@ -244,6 +271,11 @@ inline void registerCppInLua(lua_State* L, LuaThreadContext* context) {
     lua_pushlightuserdata(L, context);
     lua_pushcclosure(L, lua_Archive_getElite, 1);
     lua_setfield(L, -2, "getElite");
+
+    lua_pushlightuserdata(L, context);
+    lua_pushcclosure(L, lua_Archive_getWorstElite, 1);
+    lua_setfield(L, -2, "getWorstElite");
+
     lua_setglobal(L, "Archive");
 
     lua_pushlightuserdata(L, context);

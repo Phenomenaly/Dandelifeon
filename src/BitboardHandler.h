@@ -184,8 +184,8 @@ public:
 
         if (activeCoords.empty()) return;
 
-        static std::random_device rd;
-        static std::mt19937 gen(rd());
+        static thread_local std::random_device rd;
+        static thread_local std::mt19937 gen(rd());
         std::uniform_int_distribution<> dis(0, static_cast<int>(activeCoords.size() - 1));
 
         for (int i = 0; i < numMutations; ++i) {

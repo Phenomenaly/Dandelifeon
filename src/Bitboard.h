@@ -6,7 +6,7 @@
 #include <intrin.h>
 
 
-struct alignas(32) Bitboard {
+struct Bitboard {
     static constexpr int WIDTH = 25;
     static constexpr int HEIGHT = 25;
     static constexpr int CENTER_X = 12;

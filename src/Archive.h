@@ -53,8 +53,14 @@ public:
         entry.mana = mana;
 
         topTen.push_back(entry);
+        
         std::sort(topTen.begin(), topTen.end(), [](const LeaderboardEntry& a, const LeaderboardEntry& b) {
             if (a.mana != b.mana) return a.mana > b.mana;
+            
+            int wallsA = a.walls.popcount();
+            int wallsB = b.walls.popcount();
+            if (wallsA != wallsB) return wallsA < wallsB;
+            
             return BitboardHandler::getFigureDistance(a.cells) > BitboardHandler::getFigureDistance(b.cells);
         });
 
@@ -75,6 +81,16 @@ public:
         if (topTen.empty()) return false;
 
         int idx = randomIndex % static_cast<int>(topTen.size());
+        destCells = topTen[idx].cells;
+        destWalls = topTen[idx].walls;
+        return true;
+    }
+
+    bool getWorstElite(Bitboard& destCells, Bitboard& destWalls) {
+        std::lock_guard<std::mutex> lock(mtx);
+        if (topTen.empty()) return false;
+
+        int idx = static_cast<int>(topTen.size()) - 1;
         destCells = topTen[idx].cells;
         destWalls = topTen[idx].walls;
         return true;

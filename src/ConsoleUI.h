@@ -18,6 +18,7 @@ private:
     uint64_t lastTotalIterations = 0;
     std::chrono::steady_clock::time_point lastTime;
     int lastSavedBestMana = -1;
+    int lastSavedBestWallsCount = 9999;
 
     const std::string COLOR_RESET  = "\033[0m";
     const std::string COLOR_GREEN  = "\033[32m";
@@ -71,9 +72,21 @@ public:
         std::chrono::duration<double> elapsed = currentTime - lastTime;
         lastTime = currentTime;
 
+       int currentWallsCount = leaderboard.bestWalls.popcount();
+        bool shouldSave = false;
+
         if (leaderboard.bestMana > lastSavedBestMana) {
+            shouldSave = true;
+        } else if (leaderboard.bestMana == lastSavedBestMana) {
+            if (currentWallsCount < lastSavedBestWallsCount) {
+                shouldSave = true;
+            }
+        }
+
+        if (shouldSave) {
             savePatternToFile(leaderboard.bestCells, leaderboard.bestWalls);
             lastSavedBestMana = leaderboard.bestMana;
+            lastSavedBestWallsCount = currentWallsCount;
         }
 
         uint64_t totalIterations = 0;
@@ -91,8 +104,7 @@ public:
         ss << "\033[H"; 
 
         ss << "_________________________________\n" << ERASE_LINE_END;
-        ss << " STREAM  |  TICKS   |  MANA" << ERASE_LINE_END << "\n";
-        ss << "_________________________________" << ERASE_LINE_END << "\n";
+        ss << " STREAM  |  TICKS    |  MANA" << ERASE_LINE_END << "\n";
         for (const auto& t : leaderboard.threads) {
             ss << " S" << t.threadId << "      |  "
                << t.ticks << (t.ticks < 10 ? "        |  " : (t.ticks < 100 ? "       |  " : "      |  "))
@@ -101,7 +113,6 @@ public:
         ss << "_________________________________\n" << ERASE_LINE_END;
 
         ss << "         ABSOLUTE RECORD         " << ERASE_LINE_END << "\n";
-        ss << "_________________________________" << ERASE_LINE_END << "\n";
         
         if (leaderboard.bestMana > 0) {
             int absorbedCells = leaderboard.bestMana / (leaderboard.bestTicks * 60);
@@ -117,7 +128,6 @@ public:
 
         ss << " Total simulations:  " << COLOR_GREEN << formatNumber(totalIterations) << COLOR_RESET << ERASE_LINE_END << "\n";
         ss << " Speed:              " << COLOR_YELLOW << formatNumber(static_cast<uint64_t>(iterationsPerSecond)) << COLOR_RESET << " O/s" << ERASE_LINE_END << "\n";
-        ss << "_________________________________\n" << ERASE_LINE_END;
 
         std::cout << ss.str() << std::flush;
     }

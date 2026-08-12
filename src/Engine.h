@@ -49,5 +49,9 @@ public:
 
             _mm256_storeu_si256((__m256i*)&next.data[i], _mm256_and_si256(res, row_mask));
         }
+
+        for (int r = 26; r < 34; ++r) {
+            next.data[r] = 0;
+        }
     }
 };
